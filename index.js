@@ -178,7 +178,6 @@ class Example extends Phaser.Scene {
     this.input.on(
       "pointermove",
       (pointer) => {
-        console.log("a");
         if (pointer.isDown && gameOver === false) {
           if (
             Math.abs(ticket1XCenter - pointer.x) <= 95 &&
@@ -278,7 +277,4 @@ const config = {
   height: 600,
   scene: Example,
 };
-
-/* TEST */
-
 const game = new Phaser.Game(config);
