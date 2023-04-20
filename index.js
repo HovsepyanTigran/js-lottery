@@ -279,4 +279,6 @@ const config = {
   scene: Example,
 };
 
+/* TEST */
+
 const game = new Phaser.Game(config);
