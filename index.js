@@ -42,23 +42,26 @@ class Example extends Phaser.Scene {
 
     this.load.image("workaround", "assets/pics/turkey-1985086.jpg");
   }
+  animation() {
 
+  }
   create() {
     let bgImage = this.add.image(
       this.cameras.main.width / 2,
       this.cameras.main.height / 2,
       "bg"
     );
+    this.ticketArr = [];
     let scaleX = this.cameras.main.width / bgImage.width;
     let scaleY = this.cameras.main.height / bgImage.height;
     let scale = Math.max(scaleX, scaleY);
     bgImage.setScale(scale).setScrollFactor(0);
 
-    this.cashLogo = this.add.sprite(-30, 0, "cashLogo").setOrigin(0);
+    this.cashLogo = this.add.image(-30, 0, "cashLogo").setOrigin(0);
     this.cashLogo.displayWidth = 190;
-    this.cashLogo.displayHeight = 160;
+    this.cashLogo.displayHeight = 170;
 
-    this.interface1Text = this.add.image(0, 0, "interface1Text");
+    this.interface1Text = this.add.sprite(0, 0, "interface1Text");
 
     this.gameOver = false;
 
@@ -93,16 +96,32 @@ class Example extends Phaser.Scene {
           imageWidth * scaleText,
           imageHeight * scaleText
         );
-        if (this.gameOver != false) {
-          // this.move -= 0.1;
-          this.interface1Text.x = this.cameras.main.width / 2 + 20 - -0.1 * 50;
-
-          if (this.interface1Text.x <= this.cameras.main.width / 2 - 30) {
-            // this.move += 0.1;
-            this.interface1Text.x =
-              this.cameras.main.width / 2 - 30 + 0.1 * 400;
-            // console.log("this.cashLogo.x, this.cashLogo.x - 10");
+        if (this.gameOver === true) {
+          setTimeout(() => {
+            this.tweens.add({
+              targets: this.interface1Text,
+              x: '-=50',
+              duration: 100,
+              ease: 'Power1',
+              delay: 1,
+              onComplete: () => {
+                this.shouldMoveRight = true;
+              }
+            });
+          
+          // Create the right-to-left tween
+          if(this.shouldMoveRight === true) {
+            this.tweens.add({
+                targets: this.interface1Text,
+                x: '+=100', 
+                duration: 100,
+                ease: 'Power1',
+                yoyo: true, 
+                repeat: -1, 
+            });
           }
+          }, 2000);
+          
         }
         scaleText += 0.01 * direction;
       },
@@ -118,29 +137,32 @@ class Example extends Phaser.Scene {
     this.cardImage.displayHeight = 765 / (1420 / 664);
     this.cardImage.setInteractive({ cursor: "coin, pointer" });
 
-    this.ticket1Image = this.add.image(
+    this.ticket1Image = this.add.sprite(
       this.cardImage.displayWidth / 2 - 70,
       this.cardImage.displayHeight / 2 + 60,
       "ticket1"
     );
+    this.ticketArr.push(this.ticket1Image);
     this.ticket1Image.displayWidth = 160;
     this.ticket1Image.displayHeight = 120;
 
-    this.ticket2Image = this.add.image(
+    this.ticket2Image = this.add.sprite(
       this.cardImage.displayWidth / 2 + 180,
       this.cardImage.displayHeight / 2 + 70,
       "ticket2"
     );
+    this.ticketArr.push(this.ticket2Image);
     this.ticket2Image.displayWidth = 160;
     this.ticket2Image.displayHeight = 120;
 
-    let ticket3Image = this.add.image(
+    this.ticket3Image = this.add.sprite(
       this.cardImage.displayWidth / 2 + 180,
       this.cardImage.displayHeight / 2 + 240,
       "ticket3"
     );
-    ticket3Image.displayWidth = 160;
-    ticket3Image.displayHeight = 120;
+    this.ticketArr.push(this.ticket3Image);
+    this.ticket3Image.displayWidth = 160;
+    this.ticket3Image.displayHeight = 120;
 
     this.rt = this.add.renderTexture(
       this.cameras.main.width / 2 + 20,
@@ -165,16 +187,9 @@ class Example extends Phaser.Scene {
     let ticket2YCenter = this.ticket2Image.y;
 
     let ticket3Win = false;
-    let ticket3XCenter = ticket3Image.x;
-    let ticket3YCenter = ticket3Image.y;
+    let ticket3XCenter = this.ticket3Image.x;
+    let ticket3YCenter = this.ticket3Image.y;
     let winingTickets = [];
-    this.add.rectangle(
-      this.cameras.main.width / 2,
-      this.cameras.main.height / 2 + 30,
-      95,
-      50,
-      0x6666ff
-    );
 
     const brush = this.make.image({ key: "brush" }, false).setScale(0.3);
     cardOverlayImage.setInteractive({
@@ -246,9 +261,11 @@ class Example extends Phaser.Scene {
             winingTickets.push("ticket3");
           }
         }
+        
         ticket1Win = typeof winingTickets.find((elem) => elem === "ticket1");
         ticket2Win = typeof winingTickets.find((elem) => elem === "ticket2");
         ticket3Win = typeof winingTickets.find((elem) => elem === "ticket3");
+        
         setTimeout(() => {
           if (
             ticket1Win === "string" &&
@@ -263,6 +280,10 @@ class Example extends Phaser.Scene {
       },
       this
     );
+    this.interface1 = true
+    if(this.interface1 === false) {
+      console.log("aa")
+    }
   }
   update() {
     if (this.gameOver === true) {
@@ -273,27 +294,109 @@ class Example extends Phaser.Scene {
       this.rt.alpha = this.rt.alpha;
       setTimeout(() => {
         this.move += 0.1;
-        this.cashLogo.x = -30 - this.move * 50;
+        this.tweens.add({
+          targets: this.cashLogo, 
+          x: '-=50',
+          duration: 100,
+          ease: 'Power1',
+          onComplete: () => {
+            this.shouldMoveRight = true;
+          }
+        });
 
-        if (this.cashLogo.x <= -30 - 50) {
-          this.move += 0.1;
-          this.cashLogo.x = -30 - 60 + this.move * 400;
-          // console.log("this.cashLogo.x, this.cashLogo.x - 10");
+        this.tweens.add({
+          targets: this.cardImage,
+          x: '-=50',
+          duration: 100,
+          ease: 'Power1',
+          onComplete: () => {
+            this.shouldMoveRight = true;
+          }
+        });
+      
+      
+      if(this.shouldMoveRight === true) {
+        this.tweens.add({
+            targets: this.cashLogo,
+            x: '+=100', 
+            duration: 100,
+            ease: 'Power1',
+            yoyo: true, 
+            repeat: -1, 
+        });
+        this.tweens.add({
+          targets: this.cardImage,
+          x: '+=100', 
+          duration: 100,
+          ease: 'Power1',
+          yoyo: true, 
+          repeat: -1, 
+        });
+      }
+
+      this.ticketArr.forEach(elem => {
+        this.tweens.add({
+          targets: elem,
+          x: this.cameras.main.width / 2,
+          y: this.cameras.main.height / 2 + 30,
+          ease: 'Power3',
+          scaleX: 0.7,
+          scaleY: 0.7,
+          onComplete: (tween) => {
+            setTimeout(() => {
+              this.ticket2Image.destroy();
+              this.ticket3Image.destroy();
+              return this.interface1Move = true
+            }, 500);
+          },
+        });
+      });
+
+      if(this.interface1Move === true) {
+        // alert("AAAAAAAA")
+
+        this.tweens.add({
+          targets: this.ticket1Image,
+          x: '-=50', 
+          duration: 50,
+          ease: 'Power1',
+          yoyo: true, 
+          onComplete: () => {
+            this.r = true;
+          }
+      });
+      
+        if(this.r === true) {
+          this.tweens.add({
+            targets: this.ticket1Image,
+            x: '+=100', 
+            duration: 50,
+            ease: 'Power1',
+            yoyo: true, 
+            repeat: -1, 
+          });
         }
-
-        // this.cardImage.x = this.cameras.main.width / 2 + this.move * 500;
-
-        // if (
-        //   this.ticket1Image.x <= this.cameras.main.width / 2 &&
-        //   this.ticket1Image.y <= this.cameras.main.height / 2 + 30
-        // ) {
-        //   this.ticket1Image.x =
-        //     this.cardImage.displayWidth / 2 - 90 + this.move * 50;
-        //   this.ticket1Image.y =
-        //     this.cardImage.displayHeight / 2 + 60 + this.move * 50;
-        // }
+      }
+      this.interface1 = false;
       }, 2000);
+      // if(this.interface1Move === true) {
+      //     this.tweens.add({
+      //       targets: this.ticket1Image,
+      //       scale: 1.5,
+      //       x: this.cameras.main.width / 2,
+      //       y: this.cameras.main.height / 2 + 30,
+      //       onComplete: (tween) => {
+      //         this.ticket1Image.setPosition(
+      //           this.cameras.main.width / 2+10, this.cameras.main.height / 2 + 40)
+      //       },
+      //       repeat: 3,
+      //       yoyo: true
+      //   });
+      //   this.b = true
+      // }
+      
     }
+    
   }
 }
 
